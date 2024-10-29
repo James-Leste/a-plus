@@ -77,6 +77,14 @@
 	<script src="{% static 'js/polyfill-find.js' %}"></script>
 	<script src="{% static 'js/focus-visible-polyfill.min.js' %}"></script>
 	<script src="{% static 'js/aplus.js' %}"></script>
+    <script>
+        function changeLanguage(lang) {
+            let baseUrl = "{{ BASE_URL }}";
+            let currentPath = window.location.pathname;
+            let newUrl = `${baseUrl}${currentPath}?hl=${lang}`;
+            history.replaceState(null, '', newUrl);
+        }
+    </script>
 	{{ form.media.js }}
 
 	{% block scripts %}
@@ -150,6 +158,15 @@
 					</div>
 					<div class="collapse navbar-collapse" id="bs-navbar-collapse">
 						<ul class="user-menu nav navbar-nav navbar-right hidden-xs">
+                            <li>
+                                {% if show_language_toggle %}
+                                {% if request.LANGUAGE_CODE == 'fi'%}
+                                <a href="" onclick="changeLanguage('en')">{% translate "ENGLISH_CODE" %}</a>
+                                {% else %}
+                                <a href="" onclick="changeLanguage('fi')">{% translate "FINNISH_CODE" %}</a>
+                                {% endif %}
+                                {% endif %}
+                            </li>
 							{% if user.is_authenticated %}
 							{% group_select %}
 							{% notification_menu %}
@@ -224,6 +241,15 @@
 								</a>
 							</li>
 							{% endif %}
+                            <li>
+                                {% if show_language_toggle %}
+                                {% if request.LANGUAGE_CODE == 'fi'%}
+                                <a href="" onclick="changeLanguage('en')">{{ request.LANGUAGE_CODE }}</a>
+                                {% else %}
+                                <a href="" onclick="changeLanguage('fi')">{{ request.LANGUAGE_CODE }}</a>
+                                {% endif %}
+                                {% endif %}
+                            </li>
 						</ul>
 					</div>
 				</div>

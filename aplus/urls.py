@@ -3,6 +3,7 @@ from django.conf.urls import include
 from django.contrib import admin
 from django.contrib.sitemaps.views import sitemap
 from django.urls import path, re_path
+from . import views
 
 import shibboleth_login.urls
 import social_django.urls
@@ -55,6 +56,10 @@ urlpatterns = [
     path('sitemap.xml', sitemap, { 'sitemaps': all_sitemaps },
         name='django.contrib.sitemaps.views.sitemap'),
 ]
+
+handler403 = views.custom_403_view
+handler404 = views.custom_404_view
+handler500 = views.custom_500_view
 
 if settings.DEBUG:
     import django.views.static

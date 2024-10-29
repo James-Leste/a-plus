@@ -335,6 +335,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "lib.context_processors.aplus_version",
                 "lib.context_processors.gitmanager_enabled",
+                "lib.context_processors.base_url"
             ],
         },
     },

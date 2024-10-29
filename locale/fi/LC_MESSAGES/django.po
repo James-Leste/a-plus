@@ -5843,6 +5843,10 @@ msgstr "Palaute"
 msgid "LOADING_FAILED"
 msgstr "Lataus epäonnistui!"
 
+#: templates/base.html
+msgid "ENGLISH_CODE"
+msgstr "EN"
+
 #: templates/support_channels.html
 msgid "TEACHERS"
 msgstr "Opettajat"
