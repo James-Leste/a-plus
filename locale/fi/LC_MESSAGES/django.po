@@ -5844,8 +5844,12 @@ msgid "LOADING_FAILED"
 msgstr "Lataus epäonnistui!"
 
 #: templates/base.html
-msgid "ENGLISH_CODE"
-msgstr "EN"
+msgid "CHANGE_LANGUAGE_TO_ENGLISH"
+msgstr "Change language to English"
+
+#: templates/base.html
+msgid "CHANGE_LANGUAGE_TO_FINNISH"
+msgstr "Change language to Finnish"
 
 #: templates/support_channels.html
 msgid "TEACHERS"

@@ -7,10 +7,10 @@ from django.contrib.messages import error as error_message
 from django.utils.functional import SimpleLazyObject
 from rest_framework import permissions as drf_permissions
 
+from aplus import views
+
 from .exceptions import ValidationFailed
 from .permissions import NoPermission
-
-from aplus import views
 
 
 class AuthDispatchBase:

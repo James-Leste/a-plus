@@ -79,10 +79,14 @@
 	<script src="{% static 'js/aplus.js' %}"></script>
     <script>
         function changeLanguage(lang) {
-            let baseUrl = "{{ BASE_URL }}";
-            let currentPath = window.location.pathname;
-            let newUrl = `${baseUrl}${currentPath}?hl=${lang}`;
-            history.replaceState(null, '', newUrl);
+            const url = new URL(window.location.href);
+            url.searchParams.set('hl', lang);
+            // let baseUrl = "{{ BASE_URL }}";
+            // let currentPath = window.location.pathname;
+            // let newUrl = `${baseUrl}${currentPath}?hl=${lang}`;
+            console.log(url.toString());
+            history.replaceState(null, '', url.toString());
+            //window.location.href = url.toString();
         }
     </script>
 	{{ form.media.js }}
@@ -161,9 +165,19 @@
                             <li>
                                 {% if show_language_toggle %}
                                 {% if request.LANGUAGE_CODE == 'fi'%}
-                                <a href="" onclick="changeLanguage('en')">{% translate "ENGLISH_CODE" %}</a>
+                                <a href="?hl=en" role="button" aria-label="{% translate 'CHANGE_LANGUAGE_TO_ENGLISH' %}" hreflang="en" onclick="changeLanguage('en');">
+                                    <span>
+                                        <img src="{% static 'images/uls_white.svg' %}" alt="">
+                                        EN
+                                    </span>
+                                </a>
                                 {% else %}
-                                <a href="" onclick="changeLanguage('fi')">{% translate "FINNISH_CODE" %}</a>
+                                <a href="?hl=fi" role="button" aria-label="{% translate 'CHANGE_LANGUAGE_TO_FINNISH' %}" hreflang="fi" onclick="changeLanguage('fi');">
+                                    <span>
+                                        <img src="{% static 'images/uls_white.svg' %}" alt="">
+                                        FI
+                                    </span>
+                                </a>
                                 {% endif %}
                                 {% endif %}
                             </li>
@@ -244,9 +258,19 @@
                             <li>
                                 {% if show_language_toggle %}
                                 {% if request.LANGUAGE_CODE == 'fi'%}
-                                <a href="" onclick="changeLanguage('en')">{{ request.LANGUAGE_CODE }}</a>
+                                <a href="?hl=en" role="button" aria-label="{% translate 'CHANGE_LANGUAGE_TO_ENGLISH' %}" hreflang="en" onclick="changeLanguage('en');">
+                                    <span>
+                                        <img src="{% static 'images/uls_white.svg' %}" alt="">
+                                        EN
+                                    </span>
+                                </a>
                                 {% else %}
-                                <a href="" onclick="changeLanguage('fi')">{{ request.LANGUAGE_CODE }}</a>
+                                <a href="?hl=fi" role="button" aria-label="{% translate 'CHANGE_LANGUAGE_TO_FINNISH' %}" hreflang="fi" onclick="changeLanguage('fi');">
+                                    <span>
+                                        <img src="{% static 'images/uls_white.svg' %}" alt="">
+                                        FI
+                                    </span>
+                                </a>
                                 {% endif %}
                                 {% endif %}
                             </li>

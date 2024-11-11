@@ -14,6 +14,3 @@ def gitmanager_enabled(request):
     return {
         'GITMANAGER_ENABLED': bool(settings.GITMANAGER_URL),
     }
-
-def base_url(request):
-    return {'BASE_URL': getattr(settings, 'BASE_URL', '')}

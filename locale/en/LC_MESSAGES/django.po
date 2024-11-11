@@ -5824,8 +5824,12 @@ msgid "LOADING_FAILED"
 msgstr "Loading failed!"
 
 #: templates/base.html
-msgid "FINNISH_CODE"
-msgstr "FI"
+msgid "CHANGE_LANGUAGE_TO_ENGLISH"
+msgstr "Change language to English"
+
+#: templates/base.html
+msgid "CHANGE_LANGUAGE_TO_FINNISH"
+msgstr "Change language to Finnish"
 
 #: templates/support_channels.html
 msgid "TEACHERS"

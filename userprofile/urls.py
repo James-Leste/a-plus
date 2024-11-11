@@ -5,7 +5,7 @@ from . import views
 
 urlpatterns = [
     re_path(r'^login/$', views.CustomLoginView.as_view(), name="login"),
-    re_path(r'^logout/$', views.CustomLogoutView.as_view(), name="logout"),
+    re_path(r'^logout/$', views.AplusLogoutView.as_view(), name="logout"),
     re_path(r'^privacy-notice/$', views.PrivacyNoticeView.as_view(),
         name="privacy_notice"),
     re_path(r'^accessibility-statement/$', views.AccessibilityStatementView.as_view(),
