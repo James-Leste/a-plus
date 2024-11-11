@@ -75,7 +75,7 @@ class AuthenticationMixin(AccessMixin):
         if request.user.is_authenticated:
             # Do not `raise PermissionDenied(message)` here so that
             # view decorators such as `xframe_options_exempt` apply.
-            return views.custom_403_view(request)
+            return views.error_403(request)
 
         # Redirect not authenticated users to login
         return redirect_to_login(request.get_full_path(),

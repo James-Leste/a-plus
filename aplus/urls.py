@@ -57,9 +57,9 @@ urlpatterns = [
         name='django.contrib.sitemaps.views.sitemap'),
 ]
 
-handler403 = views.custom_403_view
-handler404 = views.custom_404_view
-handler500 = views.custom_500_view
+handler403 = views.error_403
+handler404 = views.error_404
+handler500 = views.error_500
 
 if settings.DEBUG:
     import django.views.static
