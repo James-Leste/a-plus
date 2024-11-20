@@ -11,7 +11,7 @@ from django.utils.safestring import mark_safe
 from django.utils.text import format_lazy
 from django.utils.translation import gettext_lazy as _
 
-from course.models import CourseInstance, CourseModule, StudentModuleGoal
+from course.models import CourseInstance, CourseModule
 from lib.errors import TagUsageError
 from lib.helpers import format_points as _format_points, is_ajax as _is_ajax
 from userprofile.models import UserProfile
@@ -266,8 +266,11 @@ def _points_data(
 @register.inclusion_tag("exercise/_points_progress.html")
 def points_progress(
         obj: Union[CachedPointsData, ModulePoints, CategoryPoints],
+        points_goal_enabled: Optional[bool] = None,
         ) -> Dict[str, Any]:
-    return _points_data(obj, None)
+    points_data = _points_data(obj, None)
+    points_data['points_goal_enabled'] = points_goal_enabled
+    return points_data
 
 
 @register.inclusion_tag("exercise/_points_badge.html")
