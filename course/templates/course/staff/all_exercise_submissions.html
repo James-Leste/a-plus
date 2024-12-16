@@ -1,0 +1,307 @@
+{% extends "course/course_base.html" %}
+{% load i18n %}
+{% load course %}
+{% load exercise %}
+{% load apps %}
+{% load diploma %}
+
+{% block title %}All submission | {{ block.super }}{% endblock %}
+{% block view_tag %}All submissions{% endblock %}
+
+{% block breadcrumblist %}
+{{ block.super }}
+<li class="active">All Submissions</li>
+{% endblock %}
+
+{% block coursecontent %}
+<div>
+    <h2>url</h2>
+    {{instance.url}}
+</div>
+<div>
+    <h2>tags</h2>
+    {{tagsByCourse}}
+</div>
+<div>
+    <h2>tagging</h2>
+    {{tagging_data}}
+</div>
+<div>
+    <h2>submissions</h2>
+    {{submissionsByCourse}} 
+</div>
+<div>
+    <h2>courses</h2>
+    {{course_id}}
+</div>
+<div>
+    <h2>modules</h2>
+    {{module_ids}}
+</div>
+<div>
+    <h2>exercises</h2>
+    {{exercisesByCourse}}
+</div>
+
+
+{% comment %} {{tagging_data}}
+{{submission_data}} {% endcomment %}
+
+{% endblock %}
+
+{% comment %} {% block sidecontent %}
+
+{% diploma_button %}
+{% category_points %}
+
+{% plugin_renderers user instance "results" as plugins %}
+{% for plugin in plugins %}
+    {{ plugin.render|safe }}
+{% endfor %}
+
+{% endblock %} {% endcomment %}
+
+{% comment %} {% extends "course/course_base.html" %}
+{% load i18n %}
+{% load course %}
+{% load static %}
+{% load colortag %}
+
+{% block title %}All Submissions | {{ block.super }}{% endblock %}
+{% block view_tag %}All Submissions{% endblock %}
+
+{% block breadcrumblist %}
+{{ block.super }}
+<li class="active">All Submissions</li>
+{% endblock %}
+
+<div class="clearfix">
+	<div class="pull-right">
+        <div>{{ allow_regrade }}</div>
+		{% if allow_regrade %}
+			<button type="button" class="aplus-button--secondary aplus-button--xs" data-toggle="modal" data-target="#regrade-modal">
+				{{ regrade_button }}
+			</button>
+		{% endif %}
+
+		<a class="aplus-button--secondary aplus-button--xs" href="{{ exercise|url:'submission-next-unassessed' }}">
+			<span class="glyphicon glyphicon-ok" aria-hidden="true"></span>
+			{% translate "START_MANUAL_ASSESSMENT" %}
+		</a>
+		<a class="aplus-button--secondary aplus-button--xs" href="{{ exercise|url:'submission-summary' }}">
+			<span class="glyphicon glyphicon-stats" aria-hidden="true"></span>
+			{% translate "SUMMARY" %}
+		</a>
+		<span class="dropdown">
+			<button
+				class="aplus-button--secondary aplus-button--xs dropdown-toggle"
+				type="button"
+				data-toggle="dropdown"
+				id="download-data"
+			>
+				{% translate "DOWNLOAD_POINTS" %} <span class="caret"></span>
+			</button>
+			<ul class="dropdown-menu dropdown-menu-right" aria-labeledby="download-data">
+				{% get_format_info_list "json csv excel.csv" as formats %}
+				{% for format in formats %}
+				<li>
+					<a href="{% url 'api:course-submissiondata-list' version=2 course_id=instance.id %}?exercise_id={{ exercise.id }}&amp;format={{ format.name }}">
+						{{ format.verbose_name }}
+					</a>
+				</li>
+				{% endfor %}
+			</ul>
+		</span>
+		{% if has_files %}
+			<span class="dropdown">
+				<button
+					class="aplus-button--secondary aplus-button--xs dropdown-toggle"
+					type="button"
+					data-toggle="dropdown"
+					id="download-zip-data"
+				>
+					{% translate "DOWNLOAD_SUBMISSIONS" %} <span class="caret"></span>
+				</button>
+				<ul class="dropdown-menu dropdown-menu-right" aria-labeledby="download-zip-data">
+					{% get_zip_info_list "all best" as types %}
+					{% for type in types %}
+					<li>
+						<a href="{% url 'api:exercise-submissions-zip' version=2 exercise_id=exercise.id %}?best={{ type.best }}">
+							{{ type.verbose_name }}
+						</a>
+					</li>
+					{% endfor %}
+				</ul>
+			</span>
+		{% endif %}
+	</div>
+	<p>
+		{% exercise_text_stats exercise %} |
+		{% if count <= default_limit and not limited %}
+		{% blocktranslate trimmed with count=count url=all_url %}
+			NUM_OF_SUBMISSIONS_DISPLAYED -- {{ count }}, {{ url }}
+		{% endblocktranslate %}
+		{% elif limited %}
+		{% blocktranslate trimmed with limit=default_limit url=all_url %}
+			NUM_OF_SUBMISSIONS_DISPLAYED_AND_SHOW_ALL_BTN -- {{ limit }}, {{ url }}
+		{% endblocktranslate %}
+		{% else %}
+		{% blocktranslate trimmed with count=count url=not_all_url limit=default_limit %}
+			NUM_OF_SUBMISSIONS_DISPLAYED_AND_SHOW_LATEST_BTN -- {{ count }}, {{ url }}, {{ limit }}
+		{% endblocktranslate %}
+		{% endif %}
+		<a class="aplus-button--secondary aplus-button--xs" href="{{ exercise|url:'submitter-list' }}">
+		{% translate "GROUP_BY_SUBMITTER" %}
+		</a>
+	</p>
+</div>
+
+{% block columns %}
+<div class="col-md-12">
+
+	{% if is_teacher %}
+	<p>
+		<a class="aplus-button--secondary aplus-button--sm" role="button" href="{{ instance|url:'enroll-students' }}">
+			<span class="glyphicon glyphicon-user" aria-hidden="true"></span>
+			{% translate "ENROLL_STUDENTS" %}
+		</a>
+	</p>
+	{% endif %}
+	<p class="filter-users">
+		<small>{% trans "FILTER_USERS_BY_TAG" %}:</small>
+		{% for tag in tags %}
+		<button class="btn btn-default btn-xs filter-tag" style="background-color:{{ tag.color }};color:{{ tag.font_color }};" data-tagslug="{{ tag.slug }}">
+			<span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>
+			{{ tag.name }}
+		</button>
+		{% endfor %}
+		<small>{% trans "FILTER_USERS_BY_STATUS" %}:</small>
+		{% for status_code, status_label in enrollment_statuses.items %}
+		<button class="btn btn-default btn-xs filter-status" data-status="{{ status_code }}">
+			{% if status_code == 'ACTIVE' %}
+			<span class="glyphicon glyphicon-check" aria-hidden="true"></span>
+			{% else %}
+			<span class="glyphicon glyphicon-unchecked" aria-hidden="true"></span>
+			{% endif %}
+			{{ status_label }}
+		</button>
+		{% endfor %}
+	</p>
+
+	<p>
+		{% trans "NUMBER_OF_ENROLLED_STUDENTS" %} <strong id="active-participants-number"></strong>
+		({% trans "PENDING_STUDENTS" %} <strong id="pending-participants-number"></strong>,
+		{% trans "REMOVED_STUDENTS" %} <strong id="removed-participants-number"></strong>,
+		{% trans "BANNED_STUDENTS" %} <strong id="banned-participants-number"></strong>).
+		{% if is_teacher %}
+		{% translate "OF_WHICH_SELECTED" %} <strong id="selected-number">0</strong>
+		{% endif %}
+	</p>
+
+	<table class="table table-condensed filtered-table ordered-table">
+		<thead>
+			<tr>
+				{% if is_teacher %}
+				<th data-filter-type="none" data-order-disable="true">
+					<input type="checkbox" id="students-select-all" name="students" value="all" >
+				</th>
+				{% endif %}
+				<th>{% trans "STUDENT_ID" %}</th>
+				<th>{% trans "LAST_NAME" %}</th>
+				<th>{% trans "FIRST_NAME" %}</th>
+				<th>{% trans "EMAIL" %}</th>
+				<th data-filter-type="none" data-order-disable="true">{% trans "STATUS" %}</th>
+				<th data-filter-type="none" data-order-disable="true">{% trans "TAGS" %}</th>
+				<th data-filter-type="none" data-order-disable="true"></th>
+			</tr>
+		</thead>
+		<tbody id="participants">
+		</tbody>
+	</table>
+
+</div>
+
+<div
+	class="modal"
+	id="enrollment-remove-modal"
+	tabindex="-1"
+	role="dialog"
+	aria-labelledby="enrollment-remove-modal-label"
+>
+	<div class="modal-dialog" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<button
+					type="button"
+					class="close"
+					data-dismiss="modal"
+					aria-label="close"
+				>
+					<span aria-hidden="true">&times;</span>
+				</button>
+				<h4 class="modal-title" id="enrollment-remove-modal-label">
+					<span id="enrollment-remove-modal-remove-title">
+						{% translate "ENROLLMENT_REMOVE_MODAL_REMOVE_TITLE" %}
+					</span>
+					<span id="enrollment-remove-modal-ban-title">
+						{% translate "ENROLLMENT_REMOVE_MODAL_BAN_TITLE" %}
+					</span>
+				</h4>
+			</div>
+			<div class="modal-body">
+				<div id="enrollment-remove-modal-remove-description">
+					{% translate "ENROLLMENT_REMOVE_MODAL_REMOVE_DESCRIPTION" %}
+				</div>
+				<div id="enrollment-remove-modal-ban-description">
+					{% translate "ENROLLMENT_REMOVE_MODAL_BAN_DESCRIPTION" %}
+				</div>
+				<div>
+					<strong id="enrollment-remove-modal-user"></strong>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button
+					type="button"
+					class="aplus-button--secondary aplus-button--md"
+					data-dismiss="modal"
+				>
+					{% translate "CANCEL" %}
+				</button>
+				<button
+					type="button"
+					class="aplus-button--danger aplus-button--md"
+					data-dismiss="modal"
+					id="enrollment-remove-modal-button"
+				>
+				</button>
+			</div>
+		</div>
+	</div>
+</div>
+{% include 'course/staff/_tag_remove_modal.html' %}
+{% endblock %} {% endcomment %}
+{% comment %} {% block scripts %}
+{{ block.super }}
+{% if is_teacher %}
+<script src="{% static 'django_colortag.js' %}"></script>
+<script src="{% static 'add_tagging_dropdown.js' %}"></script>
+<script src="{% static 'js/buttons_popover.js' %}"></script>
+<script src="{% static 'js/tag_popover.js' %}"></script>
+{% endif %}
+
+<script src="{% static 'js/participants.js' %}"></script>
+<script src="{% static 'course/usertagdropdown.js' %}"></script>
+<script>
+$(function () {
+	const participants = {{ participants|escape_slashes|safe }};
+	const api_url = "{% url 'api:course-detail' 2 instance.id %}";
+	const is_teacher = {{ is_teacher|yesno:"true,false" }};
+	const enrollment_statuses = {{ enrollment_statuses_json|escape_slashes|safe }};
+	participants_list(participants, api_url, is_teacher, enrollment_statuses);
+});
+</script>
+
+{% endblock %} {% endcomment %}
+
+
+
