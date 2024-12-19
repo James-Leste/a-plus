@@ -92,7 +92,7 @@
 	</button>
 	{% endfor %}
 </p>
-<table class="table table-bordered{% if not limited or count < default_limit %} filtered-table ordered-table{% endif %}" id="submissions_table">
+<table class="table table-bordered{% if count < default_limit %} filtered-table ordered-table{% endif %}" id="submissions_table">
 	<thead>
 				<tr>
 						<th>{% translate "SUBMITTERS" %} {{percentage_graded}} {% translate "GRADED" %}</th>

@@ -21,11 +21,13 @@ from authorization.permissions import ACCESS
 from exercise.cache.hierarchy import NoSuchContent
 from exercise.exercise_models import BaseExercise
 from exercise.models import LearningObject
+from exercise.staff_views import ListSubmissionsView
 from exercise.submission_models import Submission, SubmissionQuerySet, SubmissionTagging
 from exercise.viewbase import ExerciseListBaseView, ExerciseMixin
 #from exercise.views import ResultView
 from lib.helpers import settings_text, remove_query_param_from_url, is_ajax
 from lib.viewbase import BaseTemplateView, BaseRedirectMixin, BaseFormView, BaseView, BaseRedirectView
+from userprofile.models import UserProfile
 from userprofile.viewbase import UserProfileView
 from .forms import GroupsForm, GroupSelectForm
 from .models import Course, CourseInstance, CourseModule, Enrollment, SubmissionTag
@@ -392,54 +394,36 @@ class AllSubmissionsView(CourseInstanceBaseView):
     #template_name = 'submission_tagging_list.html'
     context_object_name = 'submission_taggings'
 
+
     def get_common_objects(self):
         super().get_common_objects()
         
-        course_filter_kwargs = {"url": self.instance.url}
-        module_filter_kwargs = {"course_instance_id": self.instance.id}
         
         self.tagging_data = list(SubmissionTagging.objects.all().values())
-        self.tags_data = list(SubmissionTag.objects.all().values())
-        self.submission_data = list(Submission.objects.all().values())
-        self.course_data = list(CourseInstance.objects.filter(**course_filter_kwargs).values())
-        self.exercise_data = list(BaseExercise.objects.all().values())
-        self.module_data = list(CourseModule.objects.filter(**module_filter_kwargs).values())
+        self.default_limit = 5
 
-        self.course_id = self.course_data[0].get('id') if self.course_data else None
-        self.module_ids = [module.get('id') for module in self.module_data if 'id' in module]
-        self.exercisesByCourse = [exercise.get('id') for exercise in self.exercise_data if 'id' in exercise and exercise.get('course_module_id') in self.module_ids]
-        self.submissionsByCourse = [{"id": submission.get('id'), "exercise_id": submission.get('exercise_id')} for submission in self.submission_data if 'exercise_id' in submission and submission.get('exercise_id') in self.exercisesByCourse]
-        self.tagsByCourse = [tag for tag in self.tags_data if 'course_instance_id' in tag and tag.get('course_instance_id') == self.instance.id]
-        #module_filter_kwargs = {"course_module_id": self.module.id}
+        # self.tagging_columns = list(self.tagging_data[0].keys()) if self.tagging_data else []
+        # self.submission_columns = list(self.submission_data[0].keys()) if self.submission_data else []
+        # self.course_columns = list(self.course_data[0].keys()) if self.course_data else []
+        # self.exercise_columns = list(self.exercise_data[0].keys()) if self.exercise_data else []
+        # self.module_columns = list(self.module_data[0].keys()) if self.module_data else []
 
-        self.tagging_columns = list(self.tagging_data[0].keys()) if self.tagging_data else []
-        self.submission_columns = list(self.submission_data[0].keys()) if self.submission_data else []
-        self.course_columns = list(self.course_data[0].keys()) if self.course_data else []
-        self.exercise_columns = list(self.exercise_data[0].keys()) if self.exercise_data else []
-        self.module_columns = list(self.module_data[0].keys()) if self.module_data else []
+        
+        self.submissions_data = Submission.objects.filter(exercise__course_module__course_instance=self.instance.id)
+        data = []
+        for submission in self.submissions_data:
+            data.append({
+                'submission': submission,
+                'exercise': submission.exercise,
+                'submitters': submission.submitters.all()[0],
+                'course_instance': submission.exercise.course_module.course_instance,
+                'is_teacher':True
+            })
+        self.data = data[:self.default_limit]
+        self.count = len(data)
 
-        self.note('submission_data', 'tagging_data', 'course_data', 'exercise_data', 'module_data', 'tags_data',
-                  'tagging_columns', 'submission_columns', 'course_columns', 'exercise_columns', 'module_columns', 
-                  'module_ids', 'course_id', 'exercisesByCourse', 'submissionsByCourse', 'tagsByCourse')
+        
 
-    # def get_common_objects(self):
-    #     super().get_common_objects()
-        # self.submissions = self.instance.submissions.all()
-        # self.note('submissions')
-    # model = Submission
-    # template_name = 'course_submissions.html'
-    #context_object_name = 'submissions'
-
-    # def get_queryset(self):
-    #     course_id = self.kwargs['course_id']
-    #     course = get_object_or_404(Course, id=course_id)
-    #     return Submission.objects.filter(exercise__course=course)
-
-    # def get_context_data(self, **kwargs):
-    #     context = super().get_context_data(**kwargs)
-    #     course_id = self.kwargs['course_id']
-    #     context['course'] = get_object_or_404(Course, id=course_id)
-    #     return context
-
+        self.note('tagging_data', 'submissions_data', 'data', 'count', 'default_limit')
 
 
